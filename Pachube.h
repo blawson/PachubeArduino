@@ -8,8 +8,8 @@
 class PachubeClient 
 {
   public:
-    PachubeClient(byte macAddress[], char apiKey[], int feedId, int datastreamId);
-    bool openConnection();
+    PachubeClient(char apiKey[], int feedId, int datastreamId);
+    bool openConnectionFromMac(byte macAddress[]);
 		void updateFeed(int dataToSend);
 		void readFromFeed();
     bool closeConnection();

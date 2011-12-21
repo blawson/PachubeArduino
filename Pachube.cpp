@@ -3,7 +3,6 @@
 #include "Pachube.h"
 #include "Time.h"
 
-byte *_mac;
 char *_api;
 uint16_t _feed;
 uint16_t _datastream;
@@ -12,22 +11,21 @@ bool lastConnected = false;
 const int _interval = 10000;
 EthernetClient _client;
 
-PachubeClient::PachubeClient(byte macAddress[], char apiKey[], int feedId, int datastreamId)
+PachubeClient::PachubeClient( char apiKey[], int feedId, int datastreamId)
 {
-  _mac = macAddress;
   _api= apiKey;
   _feed = feedId;
   _datastream = datastreamId;
 }
 
-bool PachubeClient::openConnection()
+bool PachubeClient::openConnectionFromMac(byte macAddress[])
 {
   Serial.begin(9600);
 
-  if (Ethernet.begin(_mac) == 0) {
+  if (Ethernet.begin(macAddress) == 0) {
     delay(1000);
 
-    if (Ethernet.begin(_mac) == 0) {
+    if (Ethernet.begin(macAddress) == 0) {
       Serial.println("Failed to configure Ethernet");
       return false;
     }
