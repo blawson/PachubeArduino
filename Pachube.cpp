@@ -3,18 +3,14 @@
 #include "Pachube.h"
 
 char *_api;
-uint16_t _feed;
-uint16_t _datastream;
 long _lastConnMillis = 0;
 bool lastConnected = false;
 const int _interval = 10000;
 EthernetClient _client;
 
-PachubeClient::PachubeClient(char apiKey[], int feedId, int datastreamId)
+PachubeClient::PachubeClient(char apiKey[])
 {
   _api= apiKey;
-  _feed = feedId;
-  _datastream = datastreamId;
 }
 
 bool PachubeClient::connectWithMac(byte macAddress[])
@@ -32,35 +28,34 @@ bool PachubeClient::connectWithMac(byte macAddress[])
   return true;
 }
 
-void PachubeClient::updateFeed(int dataToSend) {
+void PachubeClient::updateFeed(uint16_t feedId, uint16_t datastreamId, uint16_t dataToSend) {
   if (_client.available()) {
     char c = _client.read();
     Serial.print(c);
   }
 
   if (!_client.connected() && lastConnected) {
-    Serial.println();
-    Serial.println("disconnecting.");
+    Serial.println("disconnecting.\n");
     _client.stop();
   }
 
   if (!_client.connected() && (millis() - _lastConnMillis > _interval)) {
-    sendData(dataToSend);
+    sendData(feedId, datastreamId, dataToSend);
     _lastConnMillis = millis();
   }
 
   lastConnected = _client.connected();
 }
 
-void PachubeClient::sendData(int dataToSend)
+void PachubeClient::sendData(uint16_t feedId, uint16_t datastreamId, uint16_t dataToSend)
 {
   if (_client.connect("api.pachube.com", 80)) {
     Serial.println("Connecting to Pachube...");
 
     _client.print("PUT /v2/feeds/");
-    _client.print(_feed);
+    _client.print(feedId);
     _client.print("/datastreams/");
-    _client.print(_datastream);
+    _client.print(datastreamId);
     _client.print(".csv HTTP/1.1\n");
     _client.print("Host: api.pachube.com\n");
 

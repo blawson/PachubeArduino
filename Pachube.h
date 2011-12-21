@@ -7,14 +7,14 @@
 class PachubeClient 
 {
   public:
-    PachubeClient(char apiKey[], int feedId, int datastreamId);
+    PachubeClient(char apiKey[]);
     bool connectWithMac(byte macAddress[]);
-		void updateFeed(int dataToSend);
+		void updateFeed(uint16_t feedId, uint16_t datastreamId, uint16_t dataToSend);
 		void readFromFeed();
     bool closeConnection();
     int getLength(int data);
 	private:
-		void sendData(int dataToSend);
+		void sendData(uint16_t feedId, uint16_t datastreamId, uint16_t dataToSend);
 };
 
 #endif
