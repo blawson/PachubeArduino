@@ -3,22 +3,18 @@
 
 #include <Ethernet.h>
 #include "Arduino.h"
-#include "Time.h"
 
 class PachubeClient 
 {
   public:
     PachubeClient(char apiKey[], int feedId, int datastreamId);
-    bool openConnectionFromMac(byte macAddress[]);
+    bool connectWithMac(byte macAddress[]);
 		void updateFeed(int dataToSend);
 		void readFromFeed();
     bool closeConnection();
     int getLength(int data);
 	private:
 		void sendData(int dataToSend);
-		byte *_macAddress[];
-    char *_apiKey[];
-    int _feedId;
 };
 
 #endif

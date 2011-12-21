@@ -1,7 +1,6 @@
 #include "Arduino.h"
 #include <Ethernet.h>
 #include "Pachube.h"
-#include "Time.h"
 
 char *_api;
 uint16_t _feed;
@@ -11,14 +10,14 @@ bool lastConnected = false;
 const int _interval = 10000;
 EthernetClient _client;
 
-PachubeClient::PachubeClient( char apiKey[], int feedId, int datastreamId)
+PachubeClient::PachubeClient(char apiKey[], int feedId, int datastreamId)
 {
   _api= apiKey;
   _feed = feedId;
   _datastream = datastreamId;
 }
 
-bool PachubeClient::openConnectionFromMac(byte macAddress[])
+bool PachubeClient::connectWithMac(byte macAddress[])
 {
   Serial.begin(9600);
 
@@ -71,28 +70,12 @@ void PachubeClient::sendData(int dataToSend)
     _client.print("Content-Length: ");
 
     int lengthOfData = getLength(dataToSend);
-    time_t _time = now();
     _client.println(lengthOfData, DEC);
 
     _client.print("Content-Type: text/csv\n");
     _client.println("Connection: close\n");
 
-    Serial.println(_time);
-
     _client.print(dataToSend, DEC);
-    _client.print(",");
-    _client.println(year(_time));
-    _client.print("-");
-    _client.print(month(_time));
-    _client.print("-");
-    _client.print(day(_time));
-    _client.print("T");
-    _client.print(hour(_time));
-    _client.print(":");
-    _client.print(minute(_time));
-    _client.print(":");
-    _client.print(second(_time));
-    _client.print("Z");
   }
 }
 
