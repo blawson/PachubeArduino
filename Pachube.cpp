@@ -1,52 +1,104 @@
 #include "Arduino.h"
-#include "SPI.h"
-#include "Ethernet.h"
+#include <Ethernet.h>
 #include "Pachube.h"
+#include "Time.h"
 
-byte *mac;
-char *apiKey;
+byte *_mac;
+char *_api;
+uint16_t _feed;
+uint16_t _datastream;
+long _lastConnMillis = 0;
+bool lastConnected = false;
+const int _interval = 10000;
+EthernetClient _client;
 
-PachubeClient::PachubeClient(byte *macAddress[], char *apiKey[], int feedId)
+PachubeClient::PachubeClient(byte macAddress[], char apiKey[], int feedId, int datastreamId)
 {
-  _macAddress = macAddress;
-  _apiKey = apiKey;
-  _feedId = feedId;
+  _mac = macAddress;
+  _api= apiKey;
+  _feed = feedId;
+  _datastream = datastreamId;
 }
 
-PachubeClient::open()
+bool PachubeClient::openConnection()
 {
   Serial.begin(9600);
 
-  if (Ethernet.begin(_macAddress) == 0) {
-    Serial.println("Failed to configure Ethernet using DHCP");
+  if (Ethernet.begin(_mac) == 0) {
+    delay(1000);
 
-    throw;
+    if (Ethernet.begin(_mac) == 0) {
+      Serial.println("Failed to configure Ethernet");
+      return false;
+    }
+  }
+  return true;
 }
 
-PachubeClient::sendToFeed(int dataToSend)
+void PachubeClient::updateFeed(int dataToSend) {
+  if (_client.available()) {
+    char c = _client.read();
+    Serial.print(c);
+  }
+
+  if (!_client.connected() && lastConnected) {
+    Serial.println();
+    Serial.println("disconnecting.");
+    _client.stop();
+  }
+
+  if (!_client.connected() && (millis() - _lastConnMillis > _interval)) {
+    sendData(dataToSend);
+    _lastConnMillis = millis();
+  }
+
+  lastConnected = _client.connected();
+}
+
+void PachubeClient::sendData(int dataToSend)
 {
   if (_client.connect("api.pachube.com", 80)) {
     Serial.println("Connecting to Pachube...");
 
-    client.print("PUT /v2/"+_feedId+".csv HTTP/1.1\n");
-    client.print("Host: www.pachube.com\n");
+    _client.print("PUT /v2/feeds/");
+    _client.print(_feed);
+    _client.print("/datastreams/");
+    _client.print(_datastream);
+    _client.print(".csv HTTP/1.1\n");
+    _client.print("Host: api.pachube.com\n");
 
-    client.print("X-PachubeApiKey: "+_apiKey+"\n");
-    client.print("Content-Length: ");
+    _client.print("X-PachubeApiKey: ");
+    _client.print(_api);
+    _client.print("\n");
+    _client.print("Content-Length: ");
 
     int lengthOfData = getLength(dataToSend);
+    time_t _time = now();
+    _client.println(lengthOfData, DEC);
 
-    client.print("Content-Type: text/csv\n");
-    client.println("Connection: close\n");
+    _client.print("Content-Type: text/csv\n");
+    _client.println("Connection: close\n");
 
-    client.println(dataToSend, DEC);
-  }
-  else {
-    Serial.println("Connection failed.");
+    Serial.println(_time);
+
+    _client.print(dataToSend, DEC);
+    _client.print(",");
+    _client.println(year(_time));
+    _client.print("-");
+    _client.print(month(_time));
+    _client.print("-");
+    _client.print(day(_time));
+    _client.print("T");
+    _client.print(hour(_time));
+    _client.print(":");
+    _client.print(minute(_time));
+    _client.print(":");
+    _client.print(second(_time));
+    _client.print("Z");
   }
 }
 
-int getLength(int someValue) {
+int PachubeClient::getLength(int someValue) {
   //there's at least one byte:
   int digits = 1;
 
@@ -63,13 +115,8 @@ int getLength(int someValue) {
   return digits;
 }
 
-PachubeClient::readFromFeed()
+void PachubeClient::readFromFeed()
 {
 
 }
 
-PachubeClient::~PachubeClient()
-{
-  // Close the socket
-  _client.close();
-}
