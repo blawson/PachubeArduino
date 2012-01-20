@@ -7,6 +7,8 @@ long _lastConnMillis = 0;
 bool lastConnected = false;
 const int _interval = 10000;
 EthernetClient _client;
+char *_host = "api.pachube.com";
+const int _port = 80;
 
 PachubeClient::PachubeClient(char apiKey[])
 {
@@ -28,6 +30,37 @@ bool PachubeClient::connectWithMac(byte macAddress[])
   return true;
 }
 
+bool PachubeClient::connectWithIP(byte macAddress[], IPAddress localIP)
+{
+  Serial.begin(9600);
+
+  Ethernet.begin(macAddress, localIP);
+
+  if (_client.connect(_host, _port)) {
+    return true;
+  }
+  else {
+    Ethernet.begin(macAddress, localIP);
+    return (_client.connect(_host, _port));
+  }
+}
+
+bool PachubeClient::connectViaGateway(byte macAddress[], IPAddress localIP, IPAddress dnsServerIP, IPAddress gatewayIP, IPAddress subnet)
+{
+  Serial.begin(9600);
+
+  Ethernet.begin(macAddress, localIP, dnsServerIP, gatewayIP, subnet);
+
+  if (_client.connect(_host, _port)) {
+    return true;
+  }
+  else {
+    Ethernet.begin(macAddress, localIP, dnsServerIP, gatewayIP, subnet);
+    return (_client.connect(_host, _port));
+  }
+}
+
+
 void PachubeClient::updateFeed(uint16_t feedId, uint16_t datastreamId, uint16_t dataToSend) {
   if (_client.available()) {
     char c = _client.read();
@@ -45,6 +78,18 @@ void PachubeClient::updateFeed(uint16_t feedId, uint16_t datastreamId, uint16_t 
   }
 
   lastConnected = _client.connected();
+}
+
+char * PachubeClient::getFeed(uint16_t feedId) {
+  int maxSize = 50;
+  char response[maxSize];
+
+  for(int i=0; i<sizeof(response); i++) {
+    if (!_client.available()) {
+      return response;
+    }
+    char c = _client.read();
+  }
 }
 
 void PachubeClient::sendData(uint16_t feedId, uint16_t datastreamId, uint16_t dataToSend)
