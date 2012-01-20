@@ -4,3 +4,11 @@ This library will make setting up and connecting your Arduino device to Pachube 
 
 You are required to include the Ethernet library in your Arduino Sketch for the Pachube client to compile correctly.
 
+
+-- Examples
+
+ In the examples directory you will see some Arduino sketch code for setting up to connect to Pachube. You can connect via DHCP, or by specifying a static IP, or by providing gatway and DNS info if you need to route your updates more precisely.
+
+ I have tested the code for DHCP configuration, but don't have the setup at the moment to properly test the gateway code. If you find bugs please let me know and I will try and update the code quickly.
+
+ Thanks for checking the library out, good luck!
