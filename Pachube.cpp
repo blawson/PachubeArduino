@@ -1,3 +1,7 @@
+extern "C" {
+  #include "stdio.h"
+}
+
 #include "Arduino.h"
 #include <Ethernet.h>
 #include "Pachube.h"
@@ -60,8 +64,7 @@ bool PachubeClient::connectViaGateway(byte macAddress[], IPAddress localIP, IPAd
   }
 }
 
-
-void PachubeClient::updateFeed(uint16_t feedId, uint16_t datastreamId, uint16_t dataToSend) {
+void PachubeClient::updateFeed(uint32_t feedId, char datastreamId[], double dataToSend) {
   if (_client.available()) {
     char c = _client.read();
     Serial.print(c);
@@ -80,7 +83,7 @@ void PachubeClient::updateFeed(uint16_t feedId, uint16_t datastreamId, uint16_t 
   lastConnected = _client.connected();
 }
 
-char * PachubeClient::getFeed(uint16_t feedId) {
+char * PachubeClient::getFeed(uint32_t feedId) {
   int maxSize = 50;
   char response[maxSize];
 
@@ -92,7 +95,7 @@ char * PachubeClient::getFeed(uint16_t feedId) {
   }
 }
 
-void PachubeClient::sendData(uint16_t feedId, uint16_t datastreamId, uint16_t dataToSend)
+void PachubeClient::sendData(uint32_t feedId, char datastreamId[], double dataToSend)
 {
   if (_client.connect("api.pachube.com", 80)) {
     Serial.println("Connecting to Pachube...");
@@ -119,25 +122,22 @@ void PachubeClient::sendData(uint16_t feedId, uint16_t datastreamId, uint16_t da
   }
 }
 
-int PachubeClient::getLength(int someValue) {
-  //there's at least one byte:
-  int digits = 1;
+int PachubeClient::getLength(double someValue) {
+  // max of 64 characters
+  char buffer [64];
+  
+  int length = sprintf(buffer, "%f.5", someValue);
 
-  // continually divide the value by ten, 
-  // adding one to the digit count for each
-  // time you divide, until you're at 0:
-  int dividend = someValue /10;
-
-  while (dividend > 0) {
-    dividend = dividend /10;
-    digits++;
+  if (someValue < 0) {
+    // added for the '-' symbol
+    length = length+1;
   }
-  // return the number of digits:
-  return digits;
+
+  return length+1;
 }
 
 void PachubeClient::readFromFeed()
 {
-
 }
+
 

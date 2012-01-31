@@ -11,13 +11,13 @@ class PachubeClient
     bool connectWithMac(byte macAddress[]);
     bool connectWithIP(byte macAddress[], IPAddress localIP);
     bool connectViaGateway(byte macAddress[], IPAddress localIP, IPAddress dnsServerIP, IPAddress gatewayIP, IPAddress subnet);
-		void updateFeed(uint16_t feedId, uint16_t datastreamId, uint16_t dataToSend);
-    char * getFeed(uint16_t);
+		void updateFeed(uint32_t feedId, char datastreamId[], double dataToSend);
+    char * getFeed(uint32_t);
 		void readFromFeed();
     bool closeConnection();
-    int getLength(int data);
+    int getLength(double data);
 	private:
-		void sendData(uint16_t feedId, uint16_t datastreamId, uint16_t dataToSend);
+		void sendData(uint32_t feedId, char datastreamId[], double dataToSend);
 };
 
 #endif
