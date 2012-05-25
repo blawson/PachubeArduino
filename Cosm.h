@@ -1,13 +1,13 @@
-#ifndef Pachube_h
-#define Pachube_h
+#ifndef Cosm_h
+#define Cosm_h
 
 #include <Ethernet.h>
 #include "Arduino.h"
 
-class PachubeClient 
+class CosmClient 
 {
   public:
-    PachubeClient(char apiKey[]);
+    CosmClient(char apiKey[]);
     bool connectWithMac(byte macAddress[]);
     bool connectWithIP(byte macAddress[], IPAddress localIP);
     bool connectViaGateway(byte macAddress[], IPAddress localIP, IPAddress dnsServerIP, IPAddress gatewayIP, IPAddress subnet);
